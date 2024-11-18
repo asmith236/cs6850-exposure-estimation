@@ -1,4 +1,3 @@
-import network as n
 from collections import defaultdict
 import random
 

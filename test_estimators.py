@@ -1,4 +1,4 @@
-import network as n
+import network_graph as n
 import estimators as e
 
 # init graph
