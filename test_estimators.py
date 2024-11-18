@@ -1,13 +1,13 @@
 import network as n
+import estimators as e
 
-# dir containing the graph files
-dir = "./facebook"
+if __name__ == "__main__":
+    # init graph
+    graph_dir = "./facebook"  
+    G = n.init_graph(graph_dir)
 
-G = n.init_graph(dir)
+    # assign node qualities
+    n.assign_node_quality_prop(G)
 
-# assign quality values to nodes 
-# n.assign_node_quality_dist(G, distribution='normal', mean=0, std=1)
-n.assign_node_quality_prop(G)
-
-# n.visualize_interactive_plotly(G)
-
+    # calc the dqjd-inspired estimator
+    e.dqjd_estimator(G)

@@ -9,6 +9,11 @@ from collections import Counter
 #TODO resolve missing nodes in init_graph
 
 def init_graph(dir):
+    """ visualizes the given graph using plotly for interactivity (can zoom in and out to view different clusters)
+    
+    returns:
+    graph (nx.Graph): the network graph detailed in by the dir file information
+    """
     # init an empty graph
     G = nx.Graph()
 
@@ -194,6 +199,8 @@ def assign_node_quality_prop(graph):
     plt.savefig('quality_distribution.png')
 
     # verify all nodes in graph have an assigned quality
-    if not len(quality_values) == graph.number_of_nodes():
+    if len(quality_values) == graph.number_of_nodes():
+        print("quality assigned to all nodes")
+    else:
         print("error; the num of nodes assigned a quality value does not match the total number of nodes in the graph")
 
