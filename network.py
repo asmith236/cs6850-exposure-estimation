@@ -159,7 +159,6 @@ def assign_node_quality_dist(graph, distribution='normal', **kwargs):
     for i, node in enumerate(graph.nodes()):
         graph.nodes[node]['quality'] = qualities[i]
 
-# fn to assign a quality value to each node
 def assign_node_quality_prop(graph):
     """ assigns each node in the graph a quality value derived from graph properties
     
