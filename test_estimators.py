@@ -1,6 +1,5 @@
 import network as n
 import estimators as e
-import random
 
 # init graph
 graph_dir = "./facebook"  
