@@ -14,11 +14,14 @@ def dqjd_estimator(graph, n):
     returns:
     float: estimated fraction of exposed nodes in the network
     """
-
     sampled_nodes = random.sample(list(graph.nodes()), n)
     degree_counts = defaultdict(int)
     quality_counts = defaultdict(int)
     joint_counts = defaultdict(lambda: defaultdict(int))
+
+    # compute normalization factors
+    max_degree = max(dict(graph.degree()).values())
+    max_quality = max(graph.nodes[node]['quality'] for node in graph.nodes())
 
     for node in sampled_nodes:
         degree = graph.degree[node]
@@ -35,9 +38,14 @@ def dqjd_estimator(graph, n):
         p_k_theta[degree] = {}
         for quality in joint_counts[degree]:
             p_k_theta[degree][quality] = joint_counts[degree][quality] / total_nodes
-
+    
     def f_k_theta(degree, quality):
-        return min(1, 0.5 + 0.05 * degree + 0.1 * quality)
+        # normalize degree and quality
+        normalized_degree = degree / max_degree if max_degree > 0 else 0
+        normalized_quality = quality / max_quality if max_quality > 0 else 0
+        # apply sigmoid-based smoothing
+        return min(1, max(0, 1 / (1 + 2 ** -(0.1 * normalized_degree + 0.2 * normalized_quality))))
+        # return min(1, 0.5 + 0.05 * degree + 0.1 * quality) # original
 
     estimated_exposure = 0
     for degree in p_k_theta:

@@ -1,13 +1,14 @@
 import network_graph as n
 import estimators as e
+import random
 
 # init graph
 graph_dir = "./facebook"  
 G = n.init_graph(graph_dir)
 
 # assign node qualities
-n.assign_node_quality_prop(G)
-# n.assign_node_quality_dist(G, 'normal')
+# n.assign_node_quality_prop(G)
+n.assign_node_quality_dist(G, 'normal')
 
 n_samples = 100
 
