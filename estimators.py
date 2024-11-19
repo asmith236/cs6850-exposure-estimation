@@ -14,7 +14,8 @@ def dqjd_estimator(graph, n):
     returns:
     float: estimated fraction of exposed nodes in the network
     """
-    sampled_nodes = random.sample(graph.nodes(), n)
+
+    sampled_nodes = random.sample(list(graph.nodes()), n)
     degree_counts = defaultdict(int)
     quality_counts = defaultdict(int)
     joint_counts = defaultdict(lambda: defaultdict(int))
@@ -58,7 +59,7 @@ def vanilla_estimator(graph, n):
     returns:
     float: estimated average exposure of the sampled nodes
     """
-    sampled_nodes = random.sample(graph.nodes(), n)
+    sampled_nodes = random.sample(list(graph.nodes()), n)
     total_exposure = 0
 
     def exposure_function(node):
@@ -87,7 +88,7 @@ def friendship_paradox_estimator(graph, n):
     returns:
     float: estimated average exposure of the sampled friends
     """
-    sampled_edges = random.sample(graph.edges(), n)
+    sampled_edges = random.sample(list(graph.edges()), n)
     sampled_nodes = [random.choice(edge) for edge in sampled_edges]
     total_exposure = 0
     average_degree = sum(dict(graph.degree()).values()) / graph.number_of_nodes()
@@ -119,7 +120,7 @@ def hybrid_estimator(graph, n, alpha):
     returns:
     float: the estimated value based on the hybrid estimator
     """
-    sampled_nodes = random.sample(graph.nodes(), n)
+    sampled_nodes = random.sample(list(graph.nodes()), n)
     avg_degree = sum(dict(graph.degree()).values()) / graph.number_of_nodes()
     total_weighted_exposure = 0
 
