@@ -141,6 +141,6 @@ def analyze_hybrid_alpha(graph, n):
         plt.ylabel('Estimated Exposure')
         plt.title('Effect of Alpha on Hybrid Estimator')
         plt.grid(True)
-        plt.show()
+        plt.savefig("hybrid_alpha.png")
     except ImportError:
         print("Matplotlib not installed. Install it to visualize the results.")
