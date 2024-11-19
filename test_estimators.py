@@ -66,7 +66,7 @@ n.assign_node_quality_dist(G, 'normal')
 
 test_estimators(G)
 
-# Analyze the effect of alpha on the hybrid estimator
-n_samples = 1000  # Define a sample size
-print("\nAnalyzing effect of alpha on hybrid estimator...")
+# analyze the effect of alpha on the hybrid estimator
+n_samples = 1000  
+print("\nanalyzing effect of alpha on hybrid estimator...")
 e.analyze_hybrid_alpha(G, n_samples)
