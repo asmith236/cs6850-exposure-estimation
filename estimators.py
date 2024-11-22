@@ -2,8 +2,10 @@
 from collections import defaultdict
 import random
 import matplotlib.pyplot as plt
+import networkx as nx
+import numpy as np
+from math import lgamma, exp
 
-# TODO identify why dqjd estimator is always approx 1
 def dqjd_estimator(graph, n):
     """ implements the dqjd-inspired estimator
     
@@ -181,3 +183,120 @@ def analyze_hybrid_alpha(graph, n):
     plt.title('Effect of Alpha on Hybrid Estimator')
     plt.grid(True)
     plt.savefig("hybrid_alpha.png")
+
+def compute_degree_quality_joint_distribution(G, beta, mu, rho):
+    """
+    Compute the degree-quality joint distribution P(k, theta) based on the theoretical formula.
+    
+    Parameters:
+    - G: NetworkX graph
+    - beta: Degree offset parameter
+    - mu: Average quality in the network
+    - rho: Function defining the quality distribution rho(theta)
+    
+    Returns:
+    - joint_dist: Dictionary mapping (k, theta) -> P(k, theta)
+    """
+    joint_dist = defaultdict(float)
+    for node, data in G.nodes(data=True):
+        k = G.degree[node]
+        theta = data['quality']
+
+        if k < beta:
+            continue  # Skip if degree is less than beta (step function u(k - beta))
+
+        # Compute P(k, theta) using the formula
+        rho_theta = rho(theta)  # Quality distribution
+        try:
+            gamma_factor = exp(
+                (lgamma(k + theta) - lgamma(beta + theta))
+                + (lgamma(beta + theta + 2 + mu / beta) - lgamma(k + theta + 3 + mu / beta))
+            )
+        except OverflowError:
+            print(f"Overflow encountered for node {node}: k={k}, theta={theta}")
+            continue
+        
+        p_k_theta = rho_theta * (2 + mu / beta) * gamma_factor
+        joint_dist[(k, theta)] = p_k_theta
+
+    # Normalize joint distribution to ensure it sums to 1
+    total = sum(joint_dist.values())
+    for key in joint_dist:
+        joint_dist[key] /= total
+
+    return joint_dist
+
+
+def compute_nearest_neighbor_quality_degree_distribution(G, joint_dist):
+    """compute the nearest-neighbor quality-degree distribution P(ell, phi | k, theta)."""
+    nnqdd = defaultdict(float)
+    neighbor_counts = defaultdict(float)
+
+    for node, data in G.nodes(data=True):
+        k = G.degree[node]
+        theta = data['quality']
+        neighbors = G.neighbors(node)
+
+        for neighbor in neighbors:
+            ell = G.degree[neighbor]
+            phi = G.nodes[neighbor]['quality']
+            nnqdd[(ell, phi, k, theta)] += 1
+            neighbor_counts[(k, theta)] += 1
+
+    # normalize the distribution
+    for (ell, phi, k, theta), count in nnqdd.items():
+        nnqdd[(ell, phi, k, theta)] /= neighbor_counts[(k, theta)]
+
+    return nnqdd
+
+def compute_network_level_quality_paradox(G, joint_dist):
+    """Compute the network-level quality paradox (NQP)."""
+    numerator = 0
+    denominator = 0
+
+    for (k, theta), prob in joint_dist.items():
+        numerator += k * theta * prob
+        denominator += k * prob
+
+    average_quality = sum(theta * prob for (k, theta), prob in joint_dist.items())
+    nqp = (numerator / denominator) - average_quality
+    print(f"Numerator: {numerator}, Denominator: {denominator}, Average Quality: {average_quality}")
+    return nqp
+
+def compute_exposure_estimator_without_fyi(G, joint_dist, nnqdd, nqp, n_samples):
+    """Compute the final form exposure estimator without assuming predefined exposure values."""
+    total_degree = sum(G.degree[node] for node in G.nodes)
+    avg_degree = total_degree / G.number_of_nodes()
+
+    exposure = 0
+    sampled_nodes = np.random.choice(G.nodes, n_samples)
+
+    for node in sampled_nodes:
+        k = G.degree[node]
+        theta = G.nodes[node]['quality']
+        degree_correction = k / avg_degree
+
+        neighbor_correction = sum(
+            nnqdd.get((ell, phi, k, theta), 0) 
+            for ell, phi, k_key, theta_key in nnqdd.keys()
+            if k_key == k and theta_key == theta
+        )
+
+        # Estimate exposure based on degree, quality, and nearest-neighbor corrections
+        estimated_f_y = theta  # Base exposure estimate on quality
+        exposure += degree_correction * estimated_f_y * (1 + nqp) * neighbor_correction
+
+    exposure /= n_samples
+    return exposure
+
+def new_estimator(graph_model, n_samples):
+    # precompute distributions and parameters
+    # joint_dist = compute_degree_quality_joint_distribution(graph)
+    joint_dist = compute_degree_quality_joint_distribution(graph_model.graph, graph_model.beta, graph_model.mu, graph_model.rho)
+    nnqdd = compute_nearest_neighbor_quality_degree_distribution(graph_model.graph, joint_dist)
+    nqp = compute_network_level_quality_paradox(graph_model.graph, joint_dist)
+
+    # compute final form exposure estimator without predefined exposure
+    exposure_estimator = compute_exposure_estimator_without_fyi(graph_model.graph, joint_dist, nnqdd, nqp, n_samples)
+    print(f"estimated average exposure using new estimator = {exposure_estimator:.4f}")
+    return exposure_estimator
