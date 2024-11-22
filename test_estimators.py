@@ -13,7 +13,7 @@ def test_estimators(graph):
     sample_sizes = [100, 500, 1000, 1500, 2000, 2500]
 
     # number of runs per sample size
-    num_runs = 10
+    num_runs = 1
 
     alpha = 0.5 # for hybrid estimator
 
@@ -58,7 +58,7 @@ def test_estimators(graph):
 
 # init graph
 graph_dir = "./facebook"  
-G = n.init_graph(graph_dir)
+G = n.init_graph2()
 
 # assign node qualities
 # n.assign_node_quality_prop(G)
@@ -67,6 +67,6 @@ n.assign_node_quality_dist(G, 'normal')
 test_estimators(G)
 
 # analyze the effect of alpha on the hybrid estimator
-n_samples = 1000  
+n_samples = 1000
 print("\nanalyzing effect of alpha on hybrid estimator...")
 e.analyze_hybrid_alpha(G, n_samples)

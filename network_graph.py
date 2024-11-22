@@ -8,6 +8,30 @@ from collections import Counter
 
 #TODO resolve missing nodes in init_graph
 
+def init_graph2(size=2500):
+    """ initializes a graph with 10 nodes and 15 edges
+    
+    returns:
+    graph (nx.Graph): the network graph detailed in by the dir file information
+    """
+    # init an empty graph
+    G = nx.Graph()
+
+    # add nodes
+    for i in range(size):
+        G.add_node(i)
+
+    # add edges
+    for i in range(size):
+        degree = np.random.randint(1, size)
+        for _ in range(degree):
+            neighbor = np.random.randint(0, size)
+            G.add_edge(i, neighbor)
+
+    print("graph has been created with {} nodes and {} edges".format(G.number_of_nodes(), G.number_of_edges()))
+    return G
+    
+
 def init_graph(dir):
     """ visualizes the given graph using plotly for interactivity (can zoom in and out to view different clusters)
     
@@ -141,7 +165,7 @@ def visualize_interactive_plotly(graph):
 
     fig.show()
 
-def assign_node_quality_dist(graph, distribution='normal', **kwargs):
+def assign_node_quality_dist(graph, distribution='uniform', **kwargs):
     """ assigns each node in the graph a quality value drawn from a specified distribution
     
     params:
@@ -165,42 +189,47 @@ def assign_node_quality_dist(graph, distribution='normal', **kwargs):
         graph.nodes[node]['quality'] = qualities[i]
 
 def assign_node_quality_prop(graph):
-    """ assigns each node in the graph a quality value derived from graph properties
+    """ Assigns each node in the graph a quality value derived from graph properties, excluding degree dependency.
     
     params:
     graph (nx.Graph): the graph whose nodes will be assigned quality values
     """
     quality_values = []
-    for node in graph.nodes():
-        # calc quality as a fn of node features and clustering coefficient
-        clustering_coefficient = nx.clustering(graph, node)
-        degree_centrality = nx.degree_centrality(graph)[node]
-        features = graph.nodes[node].get('features', [])
-        feature_score = sum(features) / len(features) if len(features) > 0 else 1  # average feature value or default to 1
+    
+    # Calculate eigenvector centrality as a graph property (avoids direct degree dependency)
+    eigenvector_centrality = nx.eigenvector_centrality(graph, max_iter=1000)
 
-        # derive quality based on clustering, degree centrality, and feature score
-        quality = round((0.5 * clustering_coefficient) + (0.3 * degree_centrality) + (0.2 * feature_score), 2)
+    for node in graph.nodes():
+        # Calculate clustering coefficient
+        clustering_coefficient = nx.clustering(graph, node)
+        
+        # Retrieve node features and calculate feature score
+        features = graph.nodes[node].get('features', [])
+        feature_score = sum(features) / len(features) if len(features) > 0 else 1  # Average feature value or default to 1
+        
+        # Include eigenvector centrality for a global perspective on importance
+        eigencentrality_score = eigenvector_centrality[node]
+
+        # Derive quality based on clustering coefficient, eigenvector centrality, and feature score
+        quality = round((0.4 * clustering_coefficient) + (0.4 * eigencentrality_score) + (0.2 * feature_score), 2)
         graph.nodes[node]['quality'] = quality
         quality_values.append(quality)
 
-    # count the number of nodes with each quality value
+    # Count the number of nodes with each quality value
     quality_counts = Counter(quality_values)
-    # for quality, count in sorted(quality_counts.items()):
-    #     print(f'quality: {quality:.2f}, count: {count}')
-
-    # plot the distribution of quality values
+    
+    # Plot the distribution of quality values
     plt.figure(figsize=(10, 6))
     plt.bar(quality_counts.keys(), quality_counts.values(), color='skyblue')
     plt.xlabel('Quality Value')
     plt.ylabel('Number of Nodes')
-    plt.title('Distribution of Node Quality Values')
+    plt.title('Distribution of Node Quality Values (Excluding Degree Dependency)')
     plt.xticks(rotation=45)
     plt.tight_layout()
-    plt.savefig('quality_distribution.png')
+    plt.savefig('quality_distribution_updated.png')
 
-    # verify all nodes in graph have an assigned quality
+    # Verify all nodes in the graph have an assigned quality
     if len(quality_values) == graph.number_of_nodes():
-        print("quality assigned to all nodes")
+        print("Quality assigned to all nodes.")
     else:
-        print("error; the num of nodes assigned a quality value does not match the total number of nodes in the graph")
-
+        print("Error: The number of nodes assigned a quality value does not match the total number of nodes in the graph.")
