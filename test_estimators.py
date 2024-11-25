@@ -1,75 +1,107 @@
-import network_graph as n
-import estimators as e
-import numpy as np
-import matplotlib.pyplot as plt
+from network_graph import *
+from estimators import *
 
-def test_estimators(graph_model):
-    """ calculates average of estimator performance at different sample sizes
-    
-    params:
-    graph (nx.Graph): the graph used for testing
+def test_estimators_weak(graph_model_class, num_nodes=10000, alpha=2.5, p_share=0.5, seed=42, sample_sizes=[10, 20, 30, 40, 50]):
     """
-    # different sample sizes to test
-    sample_sizes = [500] # [100, 500, 1000, 1500, 2000, 2500]
+    Compare the vanilla and friendship paradox-based estimators and plot their absolute errors.
+    """
+    graph_model = graph_model_class(num_nodes=num_nodes, alpha=alpha, p_share=p_share, seed=seed)
 
-    # number of runs per sample size
-    num_runs = 1
+    vanilla_errors = []
+    friendship_errors = []
 
-    alpha = 0.5 # for hybrid estimator
-
-    # placeholder for results
-    results = {
-        "dqjd": [],
-        "vanilla": [],
-        "friendship_paradox": [],
-        "hybrid": [],
-        "test" : []
-    }
-
-    # run experiments
     for n_samples in sample_sizes:
-        dqjd_averages = []
-        vanilla_averages = []
-        friendship_averages = []
-        hybrid_averages = []
-        new_averages = []
+        vanilla_estimate = vanilla_estimator(graph_model, n_samples)
+        friendship_estimate = friendship_paradox_estimator(graph_model, n_samples)
 
-        for _ in range(num_runs):
-            dqjd_averages.append(e.dqjd_estimator(graph_model.graph, n_samples))
-            vanilla_averages.append(e.vanilla_estimator(graph_model.graph, n_samples))
-            friendship_averages.append(e.friendship_paradox_estimator(graph_model.graph, n_samples))
-            hybrid_averages.append(e.hybrid_estimator(graph_model.graph, n_samples, alpha))
-            new_averages.append(e.test_estimator(graph_model, n_samples))
+        # Absolute error in percentage
+        vanilla_error = abs(vanilla_estimate - graph_model.true_average_exposure) / graph_model.true_average_exposure * 100
+        friendship_error = abs(friendship_estimate - graph_model.true_average_exposure) / graph_model.true_average_exposure * 100
 
-        # compute average results for each estimator
-        results["dqjd"].append(np.mean(dqjd_averages))
-        results["vanilla"].append(np.mean(vanilla_averages))
-        results["friendship_paradox"].append(np.mean(friendship_averages))
-        results["hybrid"].append(np.mean(hybrid_averages))
-        results["test"].append(np.mean(new_averages))
+        vanilla_errors.append(vanilla_error)
+        friendship_errors.append(friendship_error)
 
-    # plt the results
+    # Plot the results
     plt.figure(figsize=(10, 6))
-    for key, values in results.items():
-        plt.plot(sample_sizes, values, label=key.capitalize() + " Estimator")
-
-    plt.xlabel("Sample Size (n_samples)")
-    plt.ylabel("Average Estimated Exposure")
-    plt.title("Comparison of Estimators vs. Sample Size")
+    plt.plot(sample_sizes, vanilla_errors, label="Vanilla Estimator", marker="o", color="red")
+    plt.plot(sample_sizes, friendship_errors, label="Friendship Paradox Estimator", marker="s", color="green")
+    plt.xlabel("Sample Size (n)")
+    plt.ylabel("Absolute Error (%)")
+    plt.title("Comparison of Estimators")
     plt.legend()
-    plt.grid(True)
-    plt.savefig("estimator_performance.png")
+    plt.grid()
+    plt.savefig("estimator_performance_weak.png")
 
-# init graph
-graph_dir = "./facebook"  
-graph_model = n.GraphModel(graph_dir, rho_type='uniform')  # use uniform distribution for rho(theta)
+def test_estimators_strong(graph_model_class, num_nodes=10000, alpha=2.5, pshare_values=[0.005, 0.015, 0.025, 0.5], 
+                           sample_sizes=[10, 20, 30, 40, 50], monte_carlo_iterations=5000, seed=None):
+    """
+    Tests and plots the performance of vanilla and friendship paradox-based estimators
+    against different Pshare values using a Monte Carlo average of 5,000 iterations. 
+    This involves running the estimators 'monte_carlo_iterations' times per configuration
+    (e.g., for each combination of pshare and sample size to compute a more robust average
+    error.
 
-test_estimators(graph_model)
+    Parameters:
+    - graph_model_class: The class used to create the graph model (e.g., GraphModel).
+    - num_nodes: Number of nodes in the graph.
+    - alpha: Power-law exponent for the graph's degree distribution.
+    - pshare_values: List of Pshare values to test.
+    - sample_sizes: List of sample sizes for the estimators.
+    - monte_carlo_iterations: Number of Monte Carlo iterations per configuration.
+    - seed: Random seed for reproducibility.
+    """
+    plt.figure(figsize=(15, 10))
 
-# analyze the effect of alpha on the hybrid estimator
-# n_samples = 1000  
-# print("\nanalyzing effect of alpha on hybrid estimator...")
-# e.analyze_hybrid_alpha(G, n_samples)
+    for idx, pshare in enumerate(pshare_values):
+        vanilla_errors = {n: [] for n in sample_sizes}
+        friendship_errors = {n: [] for n in sample_sizes}
+        hybrid_errors = {n: [] for n in sample_sizes}
 
-# TODO establish ground truth
-# TODO establish f(Yi)
+        # Initialize the graph model once for each Pshare
+        graph_model = graph_model_class(num_nodes=num_nodes, alpha=alpha, p_share=pshare, seed=seed)
+
+        # Perform Monte Carlo iterations
+        for _ in range(monte_carlo_iterations):
+            for n_samples in sample_sizes:
+                # Vanilla estimator
+                vanilla_estimate = vanilla_estimator(graph_model, n_samples)
+                vanilla_error = abs(vanilla_estimate - graph_model.true_average_exposure) / graph_model.true_average_exposure * 100
+                vanilla_errors[n_samples].append(vanilla_error)
+
+                # Friendship-paradox-based estimator
+                friendship_estimate = friendship_paradox_estimator(graph_model, n_samples)
+                friendship_error = abs(friendship_estimate - graph_model.true_average_exposure) / graph_model.true_average_exposure * 100
+                friendship_errors[n_samples].append(friendship_error)
+
+                # Hybrid estimator
+                hybrid_estimate = hybrid_estimator(graph_model, n_samples)
+                hybrid_error = abs(hybrid_estimate - graph_model.true_average_exposure) / graph_model.true_average_exposure * 100
+                hybrid_errors[n_samples].append(hybrid_error)
+
+        # Average the errors over all Monte Carlo iterations
+        vanilla_avg_errors = [np.mean(vanilla_errors[n]) for n in sample_sizes]
+        friendship_avg_errors = [np.mean(friendship_errors[n]) for n in sample_sizes]
+        hybrid_avg_errors = [np.mean(hybrid_errors[n]) for n in sample_sizes]
+
+        # Plot results for the current Pshare
+        plt.subplot(2, len(pshare_values) // 2, idx + 1)
+        plt.plot(sample_sizes, vanilla_avg_errors, label=f"$\\hat{{f}}_{{V}}, p_s = {pshare}$", marker="o", color="red")
+        plt.plot(sample_sizes, friendship_avg_errors, label=f"$\\hat{{f}}_{{FP}}, p_s = {pshare}$", marker="s", color="green")
+        plt.plot(sample_sizes, hybrid_avg_errors, label=f"$\\hat{{f}}_{{H}}, p_s = {pshare}$", marker="^", color="blue")
+        plt.xlabel("Sample Size (n)")
+        plt.ylabel("Absolute Error (%)")
+        plt.title(f"Absolute Error for $p_s = {pshare}$")
+        plt.ylim(0, 200)  # Adjust y-axis range to match the example plot
+        plt.legend()
+        plt.grid()
+
+    plt.tight_layout()
+    plt.savefig("estimator_performance_strong.png")()
+
+if __name__ == "__main__":
+    # Run the test with GraphModel class
+    test_estimators_strong(GraphModel, num_nodes=10000, alpha=2.5, 
+                           pshare_values=[0.005, 0.015, 0.025, 0.5], 
+                           sample_sizes=[10, 20, 30, 40, 50], 
+                           monte_carlo_iterations=5000, seed=42)
+

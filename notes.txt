@@ -5,3 +5,4 @@ Nearest-Neighbor Quality-Degree Distribution: The neighbors' contributions to th
 Adjust Exposure Estimate for Quality: We redefine the exposure estimator to include a weight proportional to the node's quality, corrected for the expected quality of neighbors using the network-level quality paradox (NQP).
 
 **Assumption - Degree and Quality are highly correlated
+               Assortativity and Degree are both positive
