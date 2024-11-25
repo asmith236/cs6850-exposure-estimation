@@ -1,8 +1,0 @@
-Incorporate Degree-Quality Joint Distribution: The degree and quality of a node are positively correlated in the model described in the paper, with the joint distribution P(k, theta). Using this, we can account for node quality in addition to degree when estimating exposure.
-
-Nearest-Neighbor Quality-Degree Distribution: The neighbors' contributions to the exposure estimation need to consider both degree and quality. This can be achieved by integrating the Nearest-Neighbor Quality-Degree Distribution P(l, phi | k, theta).
-
-Adjust Exposure Estimate for Quality: We redefine the exposure estimator to include a weight proportional to the node's quality, corrected for the expected quality of neighbors using the network-level quality paradox (NQP).
-
-**Assumption - Degree and Quality are highly correlated
-               Assortativity and Degree are both positive
