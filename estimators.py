@@ -1,4 +1,3 @@
-
 from collections import defaultdict
 import random
 import matplotlib.pyplot as plt
@@ -125,10 +124,12 @@ def friendship_paradox_estimator(graph, n):
 def hybrid_estimator(graph, n, alpha):
     """
     computes the hybrid estimator
+
     params:
     graph (nx.Graph): the graph for which the estimation is performed
     n (int): the number of nodes to sample
     alpha (float): the degree of weighting, ranges from 0 to 1
+
     returns:
     float: the estimated value based on the hybrid estimator
     """
@@ -184,51 +185,51 @@ def analyze_hybrid_alpha(graph, n):
     plt.grid(True)
     plt.savefig("hybrid_alpha.png")
 
-def compute_degree_quality_joint_distribution(G, beta, mu, rho):
+def compute_dqjd(G, beta, mu, rho):
     """
-    Compute the degree-quality joint distribution P(k, theta) based on the theoretical formula.
+    compute the degree-quality joint distribution P(k, theta).
     
-    Parameters:
-    - G: NetworkX graph
-    - beta: Degree offset parameter
-    - mu: Average quality in the network
-    - rho: Function defining the quality distribution rho(theta)
+    params:
+    - G: networkx graph
+    - beta: degree offset parameter
+    - mu: average quality in the network
+    - rho: function defining the quality distribution rho(theta)
     
     Returns:
-    - joint_dist: Dictionary mapping (k, theta) -> P(k, theta)
+    - dqjd: dictionary mapping (k, theta) -> P(k, theta)
     """
-    joint_dist = defaultdict(float)
+    dqjd = defaultdict(float)
     for node, data in G.nodes(data=True):
         k = G.degree[node]
         theta = data['quality']
 
         if k < beta:
-            continue  # Skip if degree is less than beta (step function u(k - beta))
+            continue  # skip if degree is less than beta (step function u(k - beta))
 
-        # Compute P(k, theta) using the formula
-        rho_theta = rho(theta)  # Quality distribution
+        # compute P(k, theta) using the formula from paper
+        rho_theta = rho(theta)  # quality distribution
         try:
             gamma_factor = exp(
                 (lgamma(k + theta) - lgamma(beta + theta))
                 + (lgamma(beta + theta + 2 + mu / beta) - lgamma(k + theta + 3 + mu / beta))
             )
         except OverflowError:
-            print(f"Overflow encountered for node {node}: k={k}, theta={theta}")
+            print(f"overflow encountered for node {node}: k={k}, theta={theta}")
             continue
         
         p_k_theta = rho_theta * (2 + mu / beta) * gamma_factor
-        joint_dist[(k, theta)] = p_k_theta
+        dqjd[(k, theta)] = p_k_theta
 
-    # Normalize joint distribution to ensure it sums to 1
-    total = sum(joint_dist.values())
-    for key in joint_dist:
-        joint_dist[key] /= total
+    # normalize joint distribution to ensure it sums to 1
+    total = sum(dqjd.values())
+    for key in dqjd:
+        dqjd[key] /= total
 
-    return joint_dist
+    return dqjd
 
 
-def compute_nearest_neighbor_quality_degree_distribution(G, joint_dist):
-    """compute the nearest-neighbor quality-degree distribution P(ell, phi | k, theta)."""
+def compute_nnqdd(G):
+    """compute the nearest-neighbor quality-degree distribution P(ell, phi | k, theta)"""
     nnqdd = defaultdict(float)
     neighbor_counts = defaultdict(float)
 
@@ -249,22 +250,22 @@ def compute_nearest_neighbor_quality_degree_distribution(G, joint_dist):
 
     return nnqdd
 
-def compute_network_level_quality_paradox(G, joint_dist):
-    """Compute the network-level quality paradox (NQP)."""
+def compute_nqp(dqjd):
+    """compute the network-level quality paradox (NQP)"""
     numerator = 0
     denominator = 0
 
-    for (k, theta), prob in joint_dist.items():
+    for (k, theta), prob in dqjd.items():
         numerator += k * theta * prob
         denominator += k * prob
 
-    average_quality = sum(theta * prob for (k, theta), prob in joint_dist.items())
+    average_quality = sum(theta * prob for (k, theta), prob in dqjd.items())
     nqp = (numerator / denominator) - average_quality
-    print(f"Numerator: {numerator}, Denominator: {denominator}, Average Quality: {average_quality}")
+    # print(f"numerator: {numerator}, denominator: {denominator}, average quality: {average_quality}")
     return nqp
 
-def compute_exposure_estimator_without_fyi(G, joint_dist, nnqdd, nqp, n_samples):
-    """Compute the final form exposure estimator without assuming predefined exposure values."""
+def compute_exposure(G, nnqdd, nqp, n_samples):
+    """compute the final form exposure estimator"""
     total_degree = sum(G.degree[node] for node in G.nodes)
     avg_degree = total_degree / G.number_of_nodes()
 
@@ -282,21 +283,20 @@ def compute_exposure_estimator_without_fyi(G, joint_dist, nnqdd, nqp, n_samples)
             if k_key == k and theta_key == theta
         )
 
-        # Estimate exposure based on degree, quality, and nearest-neighbor corrections
-        estimated_f_y = theta  # Base exposure estimate on quality
+        # estimate exposure based on degree, quality, and nearest-neighbor corrections
+        estimated_f_y = theta  # base exposure estimate on quality
         exposure += degree_correction * estimated_f_y * (1 + nqp) * neighbor_correction
 
     exposure /= n_samples
     return exposure
 
-def new_estimator(graph_model, n_samples):
+def test_estimator(graph_model, n_samples):
     # precompute distributions and parameters
-    # joint_dist = compute_degree_quality_joint_distribution(graph)
-    joint_dist = compute_degree_quality_joint_distribution(graph_model.graph, graph_model.beta, graph_model.mu, graph_model.rho)
-    nnqdd = compute_nearest_neighbor_quality_degree_distribution(graph_model.graph, joint_dist)
-    nqp = compute_network_level_quality_paradox(graph_model.graph, joint_dist)
+    dqjd = compute_dqjd(graph_model.graph, graph_model.beta, graph_model.mu, graph_model.rho)
+    nnqdd = compute_nnqdd(graph_model.graph)
+    nqp = compute_nqp(dqjd)
 
     # compute final form exposure estimator without predefined exposure
-    exposure_estimator = compute_exposure_estimator_without_fyi(graph_model.graph, joint_dist, nnqdd, nqp, n_samples)
-    print(f"estimated average exposure using new estimator = {exposure_estimator:.4f}")
-    return exposure_estimator
+    exposure = compute_exposure(graph_model.graph, nnqdd, nqp, n_samples)
+    print(f"estimated average exposure using test estimator = {exposure:.4f}")
+    return exposure

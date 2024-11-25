@@ -11,15 +11,15 @@ from collections import Counter
 class GraphModel:
     def __init__(self, graph_dir, rho_type='uniform', bins=10):
         """
-        Initializes the GraphModel with a graph and its parameters.
+        inits the GraphModel with a graph and params
         
-        Parameters:
-        - graph_dir (str): Directory containing graph data files.
-        - rho_type (str): Type of quality distribution ('uniform' or 'empirical').
-        - bins (int): Number of bins for empirical rho(theta) if using 'empirical'.
+        params:
+        - graph_dir (str): directory containing graph data files
+        - rho_type (str): type of quality distribution ('uniform' or 'empirical')
+        - bins (int): number of bins for empirical rho(theta) if using 'empirical'
         """
-        self.graph = self.init_graph2()
-        # self.graph = self.init_graph()
+        self.graph = self.init_graph_aaron()
+        # self.graph = self.init_graph(graph_dir)
 
         self.beta = self.compute_beta()
         self.assign_node_quality_uniform()
@@ -30,11 +30,11 @@ class GraphModel:
         elif rho_type == 'empirical':
             self.rho = self.rho_empirical(bins=bins)
         else:
-            raise ValueError("Invalid rho_type. Choose 'uniform' or 'empirical'.")
+            raise ValueError("invalid rho_type, choose 'uniform' or 'empirical'")
         
-        print(f"GraphModel initialized with beta={self.beta}, mu={self.mu:.4f}")
+        print(f"graph model initialized with beta={self.beta}, mu={self.mu:.4f}")
 
-    def init_graph2(self, size=2500):
+    def init_graph_aaron(self, size=2500):
         """ initializes a graph with 10 nodes and 15 edges
         
         returns:
@@ -60,7 +60,7 @@ class GraphModel:
     
     def init_graph(self, dir):
         """
-        Initializes the graph from the given directory.
+        inits the graph from the given dir
         """
         G = nx.Graph()
         for filename in os.listdir(dir):
@@ -88,34 +88,34 @@ class GraphModel:
 
     def compute_beta(self):
         """
-        Compute beta as the minimum degree in the graph.
+        compute beta as the minimum degree in the graph
         """
         min_degree = min(dict(self.graph.degree()).values())
         return max(1, min_degree)
 
     def assign_node_quality_uniform(self):
         """
-        Assign random quality values between 0.0 and 1.0 to each node.
+        assign random quality values between 0.0 and 1.0 to each node
         """
         for node in self.graph.nodes:
             self.graph.nodes[node]['quality'] = np.random.uniform(0.0, 1.0)
 
     def compute_mu(self):
         """
-        Compute the average quality (mu) of the nodes.
+        compute the average quality (mu) of the nodes
         """
         qualities = [self.graph.nodes[node]['quality'] for node in self.graph.nodes]
         return np.mean(qualities)
 
     def rho_uniform(self, theta):
         """
-        Define rho(theta) as a uniform distribution over [0, 1].
+        define rho(theta) as a uniform distribution over [0, 1]
         """
         return 1.0 if 0.0 <= theta <= 1.0 else 0.0
 
     def rho_empirical(self, bins=10):
         """
-        Compute an empirical distribution of qualities.
+        compute an empirical distribution of qualities
         """
         qualities = [self.graph.nodes[node]['quality'] for node in self.graph.nodes]
         hist, bin_edges = np.histogram(qualities, bins=bins, density=True)
@@ -147,10 +147,10 @@ def visualize_interactive_plotly(graph):
     params:
     graph (nx.Graph): the graph to be visualized
     """
-    # Create position layout
+    # create position layout
     pos = nx.spring_layout(graph, seed=42)
 
-    # Extract edges and nodes
+    # extract edges and nodes
     edge_x = []
     edge_y = []
     for edge in graph.edges():
@@ -212,89 +212,3 @@ def visualize_interactive_plotly(graph):
                         yaxis=dict(showgrid=False, zeroline=False, showticklabels=False)))
 
     fig.show()
-
-# def assign_node_quality_dist(graph, distribution='normal', **kwargs):
-#     """ assigns each node in the graph a quality value drawn from a specified distribution
-    
-#     params:
-#     graph (nx.Graph): the graph whose nodes will be assigned quality values
-#     distribution (str): the type of distribution to use (normal or uniform)
-#     kwargs: additional params for the distribution
-    
-#     """
-#     if distribution == 'normal':
-#         mean = kwargs.get('mean', 0)
-#         std = kwargs.get('std', 1)
-#         qualities = np.random.normal(mean, std, graph.number_of_nodes())
-#     elif distribution == 'uniform':
-#         low = kwargs.get('low', 0)
-#         high = kwargs.get('high', 1)
-#         qualities = np.random.uniform(low, high, graph.number_of_nodes())
-#     else:
-#         raise ValueError("unsupported distribution type; use 'normal' or 'uniform'")
-
-#     for i, node in enumerate(graph.nodes()):
-#         graph.nodes[node]['quality'] = qualities[i]
-
-# def assign_node_quality_prop(graph):
-#     """ assigns each node in the graph a quality value derived from graph properties
-    
-#     params:
-#     graph (nx.Graph): the graph whose nodes will be assigned quality values
-#     """
-#     quality_values = []
-#     for node in graph.nodes():
-#         # calc quality as a fn of node features and clustering coefficient
-#         clustering_coefficient = nx.clustering(graph, node)
-#         degree_centrality = nx.degree_centrality(graph)[node]
-#         features = graph.nodes[node].get('features', [])
-#         feature_score = sum(features) / len(features) if len(features) > 0 else 1  # average feature value or default to 1
-
-#         # derive quality based on clustering, degree centrality, and feature score
-#         quality = round((0.5 * clustering_coefficient) + (0.3 * degree_centrality) + (0.2 * feature_score), 2)
-#         graph.nodes[node]['quality'] = quality
-#         quality_values.append(quality)
-
-#     # count the number of nodes with each quality value
-#     quality_counts = Counter(quality_values)
-#     # for quality, count in sorted(quality_counts.items()):
-#     #     print(f'quality: {quality:.2f}, count: {count}')
-
-#     # plot the distribution of quality values
-#     plt.figure(figsize=(10, 6))
-#     plt.bar(quality_counts.keys(), quality_counts.values(), color='skyblue')
-#     plt.xlabel('Quality Value')
-#     plt.ylabel('Number of Nodes')
-#     plt.title('Distribution of Node Quality Values')
-#     plt.xticks(rotation=45)
-#     plt.tight_layout()
-#     plt.savefig('quality_distribution.png')
-
-#     # verify all nodes in graph have an assigned quality
-#     if len(quality_values) == graph.number_of_nodes():
-#         print("quality assigned to all nodes")
-#     else:
-#         print("error; the num of nodes assigned a quality value does not match the total number of nodes in the graph")
-
-def assign_node_quality_dist(graph, distribution='uniform', **kwargs):
-    """ assigns each node in the graph a quality value drawn from a specified distribution
-    
-    params:
-    graph (nx.Graph): the graph whose nodes will be assigned quality values
-    distribution (str): the type of distribution to use (normal or uniform)
-    kwargs: additional params for the distribution
-    
-    """
-    if distribution == 'normal':
-        mean = kwargs.get('mean', 0)
-        std = kwargs.get('std', 1)
-        qualities = np.random.normal(mean, std, graph.number_of_nodes())
-    elif distribution == 'uniform':
-        low = kwargs.get('low', 0)
-        high = kwargs.get('high', 1)
-        qualities = np.random.uniform(low, high, graph.number_of_nodes())
-    else:
-        raise ValueError("unsupported distribution type; use 'normal' or 'uniform'")
-
-    for i, node in enumerate(graph.nodes()):
-        graph.nodes[node]['quality'] = qualities[i]
