@@ -33,6 +33,30 @@ class GraphModel:
             raise ValueError("Invalid rho_type. Choose 'uniform' or 'empirical'.")
         
         print(f"GraphModel initialized with beta={self.beta}, mu={self.mu:.4f}")
+
+    def init_graph2(self, size=2500):
+        """ initializes a graph with 10 nodes and 15 edges
+        
+        returns:
+        graph (nx.Graph): the network graph detailed in by the dir file information
+        """
+        # init an empty graph
+        G = nx.Graph()
+
+        # add nodes
+        for i in range(size):
+            G.add_node(i)
+
+        # add edges
+        for i in range(size):
+            degree = np.random.randint(1, size)
+            for _ in range(degree):
+                neighbor = np.random.randint(0, size)
+                G.add_edge(i, neighbor)
+
+        print("graph has been created with {} nodes and {} edges".format(G.number_of_nodes(), G.number_of_edges()))
+        return G
+
     
     def init_graph(self, dir):
         """
@@ -251,30 +275,6 @@ def visualize_interactive_plotly(graph):
 #         print("quality assigned to all nodes")
 #     else:
 #         print("error; the num of nodes assigned a quality value does not match the total number of nodes in the graph")
-
-
-def init_graph2(size=2500):
-    """ initializes a graph with 10 nodes and 15 edges
-    
-    returns:
-    graph (nx.Graph): the network graph detailed in by the dir file information
-    """
-    # init an empty graph
-    G = nx.Graph()
-
-    # add nodes
-    for i in range(size):
-        G.add_node(i)
-
-    # add edges
-    for i in range(size):
-        degree = np.random.randint(1, size)
-        for _ in range(degree):
-            neighbor = np.random.randint(0, size)
-            G.add_edge(i, neighbor)
-
-    print("graph has been created with {} nodes and {} edges".format(G.number_of_nodes(), G.number_of_edges()))
-    return G
 
 def assign_node_quality_dist(graph, distribution='uniform', **kwargs):
     """ assigns each node in the graph a quality value drawn from a specified distribution

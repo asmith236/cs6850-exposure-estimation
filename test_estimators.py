@@ -60,7 +60,7 @@ def test_estimators(graph_model):
     plt.grid(True)
     plt.savefig("estimator_performance.png")
 
-def test_estimators_aaron(graph):
+def test_estimators_aaron(graph_model):
     """ calculates average of estimator performance at different sample sizes
     
     params:
@@ -80,6 +80,7 @@ def test_estimators_aaron(graph):
         "vanilla": [],
         "friendship_paradox": [],
         "hybrid": [],
+        "new": []
     }
 
     # run experiments
@@ -88,18 +89,22 @@ def test_estimators_aaron(graph):
         vanilla_averages = []
         friendship_averages = []
         hybrid_averages = []
+        new_averages = []
 
         for _ in range(num_runs):
-            dqjd_averages.append(e.new_estimator(graph, n_samples))
-            vanilla_averages.append(e.vanilla_estimator(graph, n_samples))
-            friendship_averages.append(e.friendship_paradox_estimator(graph, n_samples))
-            hybrid_averages.append(e.hybrid_estimator(graph, n_samples, alpha))
+            dqjd_averages.append(e.dqjd_estimator(graph_model.graph, n_samples))
+            vanilla_averages.append(e.vanilla_estimator(graph_model.graph, n_samples))
+            friendship_averages.append(e.friendship_paradox_estimator(graph_model.graph, n_samples))
+            hybrid_averages.append(e.hybrid_estimator(graph_model.graph, n_samples, alpha))
+            new_averages.append(e.new_estimator(graph_model, n_samples))
+
 
         # compute average results for each estimator
         results["dqjd"].append(np.mean(dqjd_averages))
         results["vanilla"].append(np.mean(vanilla_averages))
         results["friendship_paradox"].append(np.mean(friendship_averages))
         results["hybrid"].append(np.mean(hybrid_averages))
+        results["new"].append(np.mean(new_averages))
 
     # plt the results
     plt.figure(figsize=(10, 6))
@@ -115,14 +120,12 @@ def test_estimators_aaron(graph):
 
 # init graph
 graph_dir = "./facebook"  
-# graph_model = n.GraphModel(graph_dir, rho_type='uniform')  # Use uniform distribution for rho(theta)
-G = n.init_graph2()
-n.assign_node_quality_dist(G)
+graph_model = n.GraphModel(graph_dir, rho_type='uniform')  # Use uniform distribution for rho(theta)
 
 # assign node qualities
 # n.assign_node_quality_prop(G)
 
-test_estimators_aaron(G)
+test_estimators_aaron(graph_model)
 
 # analyze the effect of alpha on the hybrid estimator
 # n_samples = 1000  
