@@ -1,7 +1,9 @@
 # exposure-estimation
 
-## Methodology
+## References
 
-1) Configure facebook network subset for initial development and testing (assign each node a quality based on number of followers): https://snap.stanford.edu/data/ego-Facebook.html
-2) Implement DQJD, vanilla, and friendship paradox-based estimators 
-3) Test all estimators on various social network sizes and types
+https://arxiv.org/abs/1410.0586 /
+
+https://dl.acm.org/doi/10.1145/3688599#sec-4 / 
+
+https://epubs.siam.org/doi/full/10.1137/S003614450342480 
