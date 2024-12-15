@@ -10,31 +10,31 @@ def test_estimators_weak(graph_model_class, init_num_nodes=10000, alpha=2.2, p_s
     vanilla_errors = []
     friendship_errors = []
     hybrid_errors = []
-    nettasinghe_errors = []
+    fotouhi_errors = []
 
     for n_samples in sample_sizes:
         vanilla_estimate = vanilla_estimator(graph_model, n_samples)
         friendship_estimate = friendship_paradox_estimator(graph_model, n_samples)
         hybrid_estimate = hybrid_estimator(graph_model, n_samples)
-        nettasinghe_estimate = nettasinghe_estimator(graph_model, n_samples)
+        fotouhi_estimate = fotouhi_estimator(graph_model, n_samples)
 
         # Absolute error in percentage
         vanilla_error = abs(vanilla_estimate - graph_model.true_average_exposure) / graph_model.true_average_exposure * 100
         friendship_error = abs(friendship_estimate - graph_model.true_average_exposure) / graph_model.true_average_exposure * 100
         hybrid_error = abs(hybrid_estimate - graph_model.true_average_exposure) / graph_model.true_average_exposure * 100
-        nettasinghe_error = abs(nettasinghe_estimate - graph_model.true_average_exposure) / graph_model.true_average_exposure * 100
+        fotouhi_error = abs(fotouhi_estimate - graph_model.true_average_exposure) / graph_model.true_average_exposure * 100
 
         vanilla_errors.append(vanilla_error)
         friendship_errors.append(friendship_error)
         hybrid_errors.append(hybrid_error)
-        nettasinghe_errors.append(nettasinghe_error)
+        fotouhi_errors.append(fotouhi_error)
 
     # Plot the results
     plt.figure(figsize=(10, 6))
     plt.plot(sample_sizes, vanilla_errors, label="Vanilla Estimator", marker="o", color="red")
     plt.plot(sample_sizes, friendship_errors, label="Friendship Paradox Estimator", marker="s", color="green")
     plt.plot(sample_sizes, hybrid_errors, label="Hybrid Estimator", marker="^", color="blue")
-    plt.plot(sample_sizes, nettasinghe_errors, label="Nettasinghe Estimator", marker="*", color="purple")
+    plt.plot(sample_sizes, fotouhi_errors, label="fotouhi Estimator", marker="*", color="purple")
     plt.xlabel("Sample Size (n)")
     plt.ylabel("Absolute Error (%)")
     plt.title("Comparison of Estimators")
@@ -68,7 +68,7 @@ def test_estimators_strong(graph_model_class, init_num_nodes=10000, alpha=2.2, p
         vanilla_errors = {n: [] for n in sample_sizes}
         friendship_errors = {n: [] for n in sample_sizes}
         hybrid_errors = {n: [] for n in sample_sizes}
-        nettasinghe_errors = {n: [] for n in sample_sizes}
+        fotouhi_errors = {n: [] for n in sample_sizes}
 
         # Initialize the graph model once for each Pshare
         graph_model = graph_model_class(init_num_nodes=init_num_nodes, alpha=alpha, p_share=pshare, seed=seed)
@@ -91,25 +91,25 @@ def test_estimators_strong(graph_model_class, init_num_nodes=10000, alpha=2.2, p
                 hybrid_error = abs(hybrid_estimate - graph_model.true_average_exposure) / graph_model.true_average_exposure * 100
                 hybrid_errors[n_samples].append(hybrid_error)
 
-                # Nettasinghe estimator
-                nettasinghe_estimate = nettasinghe_estimator(graph_model, n_samples)
-                nettasinghe_error = abs(nettasinghe_estimate - graph_model.true_average_exposure) / graph_model.true_average_exposure * 100
-                nettasinghe_errors[n_samples].append(nettasinghe_error)
+                # fotouhi estimator
+                fotouhi_estimate = fotouhi_estimator(graph_model, n_samples)
+                fotouhi_error = abs(fotouhi_estimate - graph_model.true_average_exposure) / graph_model.true_average_exposure * 100
+                fotouhi_errors[n_samples].append(fotouhi_error)
 
         # Average the errors over all Monte Carlo iterations
         vanilla_avg_errors = [np.mean(vanilla_errors[n]) for n in sample_sizes]
         friendship_avg_errors = [np.mean(friendship_errors[n]) for n in sample_sizes]
         hybrid_avg_errors = [np.mean(hybrid_errors[n]) for n in sample_sizes]
-        nettasinghe_avg_errors = [np.mean(nettasinghe_errors[n]) for n in sample_sizes]
+        fotouhi_avg_errors = [np.mean(fotouhi_errors[n]) for n in sample_sizes]
 
         print(f"vanilla_avg_errors = {vanilla_avg_errors}")
         print(f"friendship_avg_errors = {friendship_avg_errors}")
         print(f"hybrid_avg_errors = {hybrid_avg_errors}")
-        print(f"nettasinghe_avg_errors = {nettasinghe_avg_errors}")
+        print(f"fotouhi_avg_errors = {fotouhi_avg_errors}")
 
         # Determine dynamic y-limits for the plot
         all_errors = (
-            vanilla_avg_errors + friendship_avg_errors + hybrid_avg_errors + nettasinghe_avg_errors
+            vanilla_avg_errors + friendship_avg_errors + hybrid_avg_errors + fotouhi_avg_errors
         )
         y_min, y_max = min(all_errors) * 0.9, max(all_errors) * 1.1  # Add some padding
 
@@ -118,7 +118,7 @@ def test_estimators_strong(graph_model_class, init_num_nodes=10000, alpha=2.2, p
         plt.plot(sample_sizes, vanilla_avg_errors, label=f"$\\hat{{f}}_{{V}}, p_s = {pshare}$", marker="o", color="red")
         plt.plot(sample_sizes, friendship_avg_errors, label=f"$\\hat{{f}}_{{FP}}, p_s = {pshare}$", marker="s", color="green")
         plt.plot(sample_sizes, hybrid_avg_errors, label=f"$\\hat{{f}}_{{H}}, p_s = {pshare}$", marker="^", color="blue")
-        plt.plot(sample_sizes, nettasinghe_avg_errors, label=f"$\\hat{{f}}_{{N}}, p_s = {pshare}$", marker="*", color="purple")
+        plt.plot(sample_sizes, fotouhi_avg_errors, label=f"$\\hat{{f}}_{{N}}, p_s = {pshare}$", marker="*", color="purple")
         plt.xlabel("Sample Size (n)")
         plt.ylabel("Absolute Error (%)")
         plt.title(f"Absolute Error for $p_s = {pshare}$")
