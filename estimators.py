@@ -119,7 +119,7 @@ def compute_nqp(dqjd):
     avg_quality = sum(theta * prob for (k, theta), prob in dqjd.items())
     return (numerator / denominator) - avg_quality
 
-def nettasinghe_estimator(graph_model, n_samples):
+def fotouhi_estimator(graph_model, n_samples):
     """
     Estimate the average exposure using the final form estimator.
     
