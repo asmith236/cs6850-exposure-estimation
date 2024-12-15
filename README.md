@@ -1,5 +1,10 @@
 # exposure-estimation
 
+To recreate the numerical experiment referenced in our final paper, execute the following:
+```
+python3 test_estimators.py
+```
+
 ## References
 
 https://arxiv.org/abs/1410.0586 

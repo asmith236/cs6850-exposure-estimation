@@ -7,7 +7,7 @@ def vanilla_estimator(graph_model, n_samples):
     """
     Estimate the average exposure using the vanilla estimator.
     """
-    sampled_nodes = random.sample(graph_model.G.nodes, n_samples)
+    sampled_nodes = random.sample(list(graph_model.G.nodes), n_samples)
     exposure_estimate = np.mean([graph_model.G.nodes[node]["share"] for node in sampled_nodes])
     return exposure_estimate
 
@@ -40,7 +40,7 @@ def hybrid_estimator(graph_model, n_samples, alpha=0.5):
     Returns:
     - Estimated average exposure using the hybrid estimator.
     """
-    sampled_nodes = random.sample(graph_model.G.nodes, n_samples)  # Uniformly sample n nodes
+    sampled_nodes = random.sample(list(graph_model.G.nodes), n_samples)  # Uniformly sample n nodes
     avg_degree = graph_model.average_degree()  # Calculate the average degree of the graph
 
     exposure_estimate = 0
@@ -137,7 +137,7 @@ def fotouhi_estimator(graph_model, n_samples):
     avg_degree = graph_model.average_degree()
 
     # Sample nodes uniformly
-    sampled_nodes = random.sample(graph_model.G.nodes, n_samples)
+    sampled_nodes = random.sample(list(graph_model.G.nodes), n_samples)
     exposure_estimate = 0
 
     for node in sampled_nodes:
