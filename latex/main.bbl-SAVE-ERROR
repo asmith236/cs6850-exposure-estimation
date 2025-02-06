@@ -1,0 +1,124 @@
+% $ biblatex auxiliary file $
+% $ biblatex bbl format version 3.2 $
+% Do not modify the above lines!
+%
+% This is an auxiliary file used by the 'biblatex' package.
+% This file may safely be deleted. It will be recreated by
+% biber as required.
+%
+\begingroup
+\makeatletter
+\@ifundefined{ver@biblatex.sty}
+  {\@latex@error
+     {Missing 'biblatex' package}
+     {The bibliography requires the 'biblatex' package.}
+      \aftergroup\endinput}
+  {}
+\endgroup
+
+
+\refsection{0}
+  \datalist[entry]{nty/global//global/global}
+    \entry{fotouhi2014generalizedfriendshipparadoxanalytical}{misc}{}
+      \name{author}{3}{}{%
+        {{hash=8cb3d7ee1ad996fe355feb31f7e70be8}{%
+           family={Fotouhi},
+           familyi={F\bibinitperiod},
+           given={Babak},
+           giveni={B\bibinitperiod}}}%
+        {{hash=f43f4c73dde9801e1d7ce40d24512f52}{%
+           family={Momeni},
+           familyi={M\bibinitperiod},
+           given={Naghmeh},
+           giveni={N\bibinitperiod}}}%
+        {{hash=e59208ca1d41b932e7739aaf5d333b18}{%
+           family={Rabbat},
+           familyi={R\bibinitperiod},
+           given={Michael\bibnamedelima G.},
+           giveni={M\bibinitperiod\bibinitdelim G\bibinitperiod}}}%
+      }
+      \strng{namehash}{299dc0efaa26de7524a558ccddb109b2}
+      \strng{fullhash}{299dc0efaa26de7524a558ccddb109b2}
+      \strng{bibnamehash}{299dc0efaa26de7524a558ccddb109b2}
+      \strng{authorbibnamehash}{299dc0efaa26de7524a558ccddb109b2}
+      \strng{authornamehash}{299dc0efaa26de7524a558ccddb109b2}
+      \strng{authorfullhash}{299dc0efaa26de7524a558ccddb109b2}
+      \field{sortinit}{F}
+      \field{sortinithash}{2638baaa20439f1b5a8f80c6c08a13b4}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{eprintclass}{physics.soc-ph}
+      \field{eprinttype}{arXiv}
+      \field{title}{Generalized Friendship Paradox: An Analytical Approach}
+      \field{year}{2014}
+      \verb{eprint}
+      \verb 1410.0586
+      \endverb
+      \verb{urlraw}
+      \verb https://arxiv.org/abs/1410.0586
+      \endverb
+      \verb{url}
+      \verb https://arxiv.org/abs/1410.0586
+      \endverb
+    \endentry
+    \entry{10.1145/3688599}{article}{}
+      \name{author}{4}{}{%
+        {{hash=a1208d1de9a3b90cf336ce9ad9422dee}{%
+           family={Nettasinghe},
+           familyi={N\bibinitperiod},
+           given={Buddhika},
+           giveni={B\bibinitperiod}}}%
+        {{hash=f12f3c8e0263a080a99f93fbaf71261b}{%
+           family={Kadoma},
+           familyi={K\bibinitperiod},
+           given={Kowe},
+           giveni={K\bibinitperiod}}}%
+        {{hash=d301000d5a6fa747386198431ac30398}{%
+           family={Naaman},
+           familyi={N\bibinitperiod},
+           given={Mor},
+           giveni={M\bibinitperiod}}}%
+        {{hash=59fb8bc312e0ac52e01cd093194d86b0}{%
+           family={Krishnamurthy},
+           familyi={K\bibinitperiod},
+           given={Vikram},
+           giveni={V\bibinitperiod}}}%
+      }
+      \list{location}{1}{%
+        {New York, NY, USA}%
+      }
+      \list{publisher}{1}{%
+        {Association for Computing Machinery}%
+      }
+      \strng{namehash}{1ae1b65e86bbf11e639827b5aed3ecfc}
+      \strng{fullhash}{eb3e380b1a2b87c62392a742165f194a}
+      \strng{bibnamehash}{1ae1b65e86bbf11e639827b5aed3ecfc}
+      \strng{authorbibnamehash}{1ae1b65e86bbf11e639827b5aed3ecfc}
+      \strng{authornamehash}{1ae1b65e86bbf11e639827b5aed3ecfc}
+      \strng{authorfullhash}{eb3e380b1a2b87c62392a742165f194a}
+      \field{sortinit}{N}
+      \field{sortinithash}{22369a73d5f88983a108b63f07f37084}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{abstract}{Estimating exposure to information on a social network is a problem with important consequences for our society. The exposure estimation problem involves finding the fraction of people on the network who have been exposed to a piece of information (e.g., a URL of a news article on Facebook, a hashtag on Twitter). The exact value of exposure to a piece of information is determined by two features: the structure of the underlying social network and the set of people who shared the piece of information. Often, both features are not publicly available (i.e., access to the two features is limited only to the internal administrators of the platform) and are difficult to estimate from data. As a solution, we propose two methods to estimate the exposure to a piece of information in an unbiased manner: a vanilla method that is based on sampling the network uniformly and a method that non-uniformly samples the network motivated by the Friendship Paradox. We provide theoretical results that characterize the conditions (in terms of properties of the network and the piece of information) under which one method outperforms the other. Further, we outline extensions of the proposed methods to dynamic information cascades (where the exposure needs to be tracked in real time). We demonstrate the practical feasibility of the proposed methods via experiments on multiple synthetic and real-world datasets.}
+      \field{journaltitle}{Trans. Soc. Comput.}
+      \field{month}{9}
+      \field{number}{1–4}
+      \field{title}{Estimating Exposure to Information on Social Networks}
+      \field{volume}{7}
+      \field{year}{2024}
+      \verb{doi}
+      \verb 10.1145/3688599
+      \endverb
+      \verb{urlraw}
+      \verb https://doi.org/10.1145/3688599
+      \endverb
+      \verb{url}
+      \verb https://doi.org/10.1145/3688599
+      \endverb
+      \keyw{Social networks,exposure to information,friendship paradox,information diffusion,information cascades}
+    \endentry
+  \enddatalist
+\endrefsection
+\endinput
+
